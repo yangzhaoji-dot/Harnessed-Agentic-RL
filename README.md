@@ -14,7 +14,8 @@ This repository tracks:
 
 ## Repository layout
 
-- `papers/papers.csv` — master structured literature table
+- `papers/papers.csv` — master structured literature table (being normalized as new papers are verified)
+- `papers/recent-and-adjacent.md` — **high-priority recent papers and papers that directly threaten/shape novelty**
 - `papers/harnessed-agentic-rl.md` — harness-native / harnessed RL
 - `papers/harness-optimization.md` — harness optimization and evolution
 - `papers/internalization.md` — self-distillation, capability handoff, retirement
@@ -22,9 +23,13 @@ This repository tracks:
 - `papers/code-status.md` — official implementations and release status
 - `notes/research-gaps.md` — open research questions and ICML-oriented gaps
 
+## Current must-track set
+
+The core map now includes OPHSD, Co-Harness, Agent Lightning v1.0, OpenForgeRL, Harness-RL, EvoHarness-RL, CHILL-Harness, SafeEvolve, JIT-Agent, AutoSaddler, StarHarness, EnvHarness, TaoLive HAT, ReSkill, D2Skill and SKILLC.
+
 ## Tracked fields
 
-For each paper we record, when available: title, authors, date, venue/arXiv, code, category, harness components, whether the harness is fixed/learned/evolved, update mechanism, RL algorithm, training target, model/parameter scale, training method, benchmark, environment type, reward, rollout usage, whether the harness changes during training, internalization test, component retirement, compute/training scale, headline results, relation to Harnessed Agentic RL / Co-Harness / OPHSD / EvoHarness-RL / CHILL, and open gaps.
+For each paper we record, when available: title, authors, date, venue/arXiv, code, category, harness components, whether the harness is fixed/learned/evolved, update mechanism, RL algorithm, training target, model/parameter scale, training method, benchmark, environment type, reward, rollout usage, whether the harness changes during training, internalization test, component retirement, compute/training scale, headline results, relation to prior work, and open gaps.
 
 ## Source-code policy
 
