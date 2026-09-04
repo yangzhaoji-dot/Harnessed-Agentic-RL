@@ -25,10 +25,34 @@ This repository tracks:
 - `papers/benchmarks.md` — benchmark and environment index
 - `papers/code-status.md` — official implementations and release status
 - `notes/research-gaps.md` — open research questions and ICML-oriented gaps
+- `scripts/generate_stats.py` — generates repository statistics from `papers/papers.csv`
+- `.github/workflows/update-stats.yml` — automatically refreshes figures after literature-table updates
 
 ## Current must-track set
 
 The core map includes OPHSD, Co-Harness, Agent Lightning v1.0, OpenForgeRL, Harness-RL, EvoHarness-RL, CHILL-Harness, SafeEvolve, JIT-Agent, AutoSaddler, StarHarness, EnvHarness, TaoLive HAT, ReSkill, D2Skill and SKILLC. The adjacent algorithmic tracker additionally follows recent work such as **PGPO** and **Coverage, Not Targeting**, plus high-value process-attribution/diversity work such as **CHIME**.
+
+## Live statistics
+
+These figures are generated automatically from `papers/papers.csv` by GitHub Actions whenever the paper table or statistics code changes.
+
+### Papers over time
+![Papers over time](docs/figures/papers_over_time.svg)
+
+### Research categories
+![Research categories](docs/figures/research_categories.svg)
+
+### RL / optimization algorithms
+![RL algorithms](docs/figures/rl_algorithms.svg)
+
+### Model scale
+![Model scale](docs/figures/model_scale.svg)
+
+### Benchmarks
+![Benchmarks](docs/figures/benchmarks.svg)
+
+### Internalization evidence
+![Internalization evidence](docs/figures/internalization_evidence.svg)
 
 ## Tracked fields
 
