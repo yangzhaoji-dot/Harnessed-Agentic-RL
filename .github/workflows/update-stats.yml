@@ -12,12 +12,18 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: literature-stats-main
+  cancel-in-progress: false
+
 jobs:
   generate-stats:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -39,5 +45,6 @@ jobs:
             echo "No figure changes to commit."
           else
             git commit -m "chore: update literature statistics"
-            git push
+            git pull --rebase origin main
+            git push origin main
           fi
