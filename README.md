@@ -36,6 +36,12 @@ The core map includes OPHSD, Co-Harness, Agent Lightning v1.0, OpenForgeRL, Harn
 
 These figures are generated automatically from `papers/papers.csv` by GitHub Actions whenever the paper table or statistics code changes.
 
+### Research landscape
+
+The x-axis is **Harness mutability / optimization degree**; the y-axis is **served-model learning degree**. Coordinates for papers we have already reviewed are manually curated; newly added papers get a heuristic fallback until reviewed. This is a conceptual research map, **not a performance ranking**.
+
+![Research landscape](docs/figures/research_landscape.svg)
+
 ### Papers over time
 ![Papers over time](docs/figures/papers_over_time.svg)
 
