@@ -58,17 +58,84 @@ This thematic tracker covers work that can directly shape **Agentic RL**, **rese
 - Key research question opened: can diversity-preserving Agentic RL optimize task reward subject to an information-theoretic minimum-diversity constraint over idea trajectories or graph branches?
 - Priority: **High adjacent**.
 
+## 2026-09-03 / 2026-09-04 newly surfaced high-priority work
+
+### TIGPO: Temporal Instance-Graph Policy Optimization for Long-Horizon LLM Agents
+- Author: Jinwei Gan
+- arXiv: https://arxiv.org/abs/2609.03383
+- Date: 2026-09-03
+- Category: Agentic RL; Graph Credit Assignment; Historical Experience; Exploration
+- Core idea: keeps a **persistent per-task state-transition graph across policy updates** instead of rebuilding and discarding a graph every batch. Historical transitions provide detached structural references for current on-policy credit, while an Exploration–Revisit schedule reconnects present rollouts to useful earlier states.
+- Benchmarks: ALFWorld; WebShop.
+- Why it matters for our direction: this is unusually close to an **idea-graph RL** abstraction. Different policy versions can discover different fragments of a useful reasoning/idea path, and a persistent graph can connect them without directly replaying stale policy trajectories.
+- Key research question opened: should a research-idea graph be persistent across training iterations, with old hypothesis/evidence transitions used to estimate credit for new branches?
+- Priority: **Must read**.
+
+### FlowBalance: Verifier-Grounded Self-Improvement from On-Policy Reasoning Experience
+- Authors: Zixun Huang, Kishan Panaganti, Haitao Mi, Leowei Liang
+- arXiv: https://arxiv.org/abs/2609.03241
+- Date: 2026-09-03
+- Category: On-Policy Self-Improvement; RL; Diversity Preservation; Verifier-Grounded Guidance
+- Models: Qwen3-4B; Qwen3-8B.
+- Core idea: obtains privileged same-policy self-guidance but **calibrates it with verifier-derived group advantage**: retain guidance for positive-advantage trajectories, reverse it for negative-advantage trajectories, and turn it off when the group gives no outcome preference.
+- Diversity result: reports higher correct-strategy diversity than FlowRL in a controlled AIME24 diagnostic while avoiding direct OPSD response-length collapse.
+- Why it matters for our direction: provides a concrete recipe for using dense/self-generated guidance without letting it collapse exploration onto one apparently good mode. This is directly relevant to diversity-preserving research-idea RL.
+- Key research question opened: can idea critique/self-guidance be verifier-gated so that it sharpens good idea modes without homogenizing the idea population?
+- Priority: **Must read**.
+
+### SciLENS: RL-Driven Autonomous Agents for Scientific Localized Evidence Navigation and Synthesis
+- Authors: Leqi Zheng, Jinbo Su, Yuying Li, Chaokun Wang, Weiping Wang, Haitao Li, Jiajun Zhang, Shannan Yan, Zhaolu Kang, Rong Fu, Jie Wu, Fang Niu, Hang Zhang
+- arXiv: https://arxiv.org/abs/2609.03338
+- Date: 2026-09-03
+- Category: Scientific Agent; Citation Graph; Process Reward; Evidence Grounding
+- Core idea: a fully local scientific-evidence agent over ~12M academic records. It makes **structural visualization of citation topology an actionable tool inside the reasoning loop**, and creates training data from multi-hop citation-graph substructures.
+- Reward / credit design: reverse-decomposition rubrics provide fine-grained process rewards for early planning and evidence grounding.
+- Why it matters for our direction: this is not research-idea generation itself, but it gives a practical precedent for making a scientific graph an **active reasoning state/tool** rather than a passive visualization, and for attaching process reward to scientific evidence navigation.
+- Key research question opened: can an idea graph jointly represent hypotheses and citation/evidence topology, with RL deciding when to expand, merge, verify, or abandon branches?
+- Priority: **High**.
+
+### Gradients Know What Outcomes Don't: Gradient-Aligned Rewards (GAR)
+- Authors: Leqi Zheng, Jinbo Su, Fang Niu, Chaokun Wang, Weiping Wang, Jiajun Zhang, Shannan Yan, Jie Wu, Zhaolu Kang, Rong Fu, Hang Zhang
+- arXiv: https://arxiv.org/abs/2609.03342
+- Date: 2026-09-03
+- Category: Dense Reward; RLVR; Process Supervision; Gradient-Space Credit
+- Models: Qwen3-4B; Qwen3-8B.
+- Core idea: builds a dense reward from cosine alignment between a rollout gradient and an expert-anchor gradient, using truncated backpropagation through the output projection; reported wall-clock overhead is under 9%.
+- Why it matters for our direction: introduces a third family of process signal beyond **LLM-judge textual critique** and **outcome redistribution**: the model’s own gradient geometry. This may be useful when multiple successful idea trajectories receive the same terminal score but differ in learning value.
+- Priority: **High adjacent**.
+
+### Legibility is Not Interpretability: Comparing Judged and Actual Importance in Chain-Of-Thought Reasoning
+- Authors: Kevin Du, Alexander Hoyle, Laura Ruis, Acyr Locatelli
+- arXiv: https://arxiv.org/abs/2609.04194
+- Date: 2026-09-03; COLM 2026
+- Category: Process Reward; Credit Assignment; LLM Judge Reliability; Counterfactual Importance
+- Core idea: defines the importance of a reasoning step by its change in expected reward estimated with Monte Carlo rollouts, then tests whether LLM judges can identify those high-advantage steps. Capable judges beat a prevalence baseline but remain well below a noise ceiling; a trained step critic also remains far from ceiling on correct trajectories.
+- Why it matters for our direction: a strong warning against assuming that a readable critique of an idea node is equivalent to its **causal contribution**. Process rewards based only on node text/LLM judgment may systematically misassign credit.
+- Key research question opened: for idea graphs, should node importance be estimated with counterfactual rollout/intervention tests rather than solely by an LLM evaluator?
+- Priority: **Must read / methodological caution**.
+
+### Where Does Harness-Optimization Value Live? (HARNESSEVO)
+- Authors: Michael Nguyen, Wei Chen Tan, Nurul Aisyah Hassan, Arvind Raman, Li Hua Lim, Ahmad Faiz Razak
+- arXiv: https://arxiv.org/abs/2609.02889
+- Newly listed in the 2026-09-04 cs.CL feed; arXiv submission-history metadata currently displays an earlier date.
+- Category: Harness Evolution; Component Credit Assignment; Search Budget
+- Core idea: decomposes a textual harness into role, task-strategy, tool/format-rules, and reflection/control, then uses leave-one-in / leave-one-out attribution to identify where evolution value actually resides.
+- Benchmarks: ALFWorld; WebShop; frozen 7B backbone reported.
+- Result: on ALFWorld, most useful optimization value localizes to reflection/control; uniform search-budget splitting across slots can fall below the optimizer’s effective search floor, while concentrating budget on the high-credit slot recovers large gains.
+- Why it matters for our direction: suggests **credit assignment should precede harness evolution**. If we later let an idea-generation Harness evolve retrieval, critique, branching, memory, and verification, equal optimization budget across components may be a bad default.
+- Priority: **High / directly relevant to Harness design**.
+
 ## Synthesis for research idea generation
 
-These papers expose a useful tension:
+The newest work sharpens the design space into four distinct questions:
 
-1. **PGPO:** make credit more local and informative using cross-trajectory state potentials.
-2. **Coverage, Not Targeting:** precise targeting can be the wrong objective when verifier information density is low; broad causal-chain coverage may dominate.
-3. **CHIME:** before updating a component, attribute the outcome to the correct subsystem.
-4. **Conditional-diversity work:** preserve distributional/semantic diversity rather than relying on surface-level entropy.
+1. **Persistent graph credit (TIGPO):** accumulate useful state/branch structure across policy updates rather than treating every rollout batch as isolated.
+2. **Reliable dense signal (GAR + Legibility):** process reward can come from gradient/counterfactual evidence, while plain LLM-judged textual importance is not necessarily causal importance.
+3. **Diversity-preserving guidance (FlowBalance):** dense self-guidance should be anchored to reliable outcome/verifier evidence so it does not collapse onto one reasoning mode.
+4. **Scientific graph as an action space (SciLENS):** citation/evidence topology can live inside the agent loop, suggesting an idea graph should be executable and editable rather than only visualized.
 
-For scientific ideation / idea graphs, a promising abstraction is therefore:
+A useful research abstraction is now:
 
-`idea graph exploration -> verifier/evidence signals -> attribution/coverage decision -> node/branch/component credit -> diversity-constrained policy or harness update`
+`persistent idea/evidence graph -> exploration/revisit -> verifier/counterfactual/gradient evidence -> node/branch/component credit -> diversity-aware policy or harness update`
 
-This is more general than simply adding a step-level process reward to GRPO.
+This is materially richer than simply attaching a scalar process reward to each idea-generation step.
