@@ -18,6 +18,7 @@ This repository tracks:
 
 - `papers/papers.csv` — master structured literature table (being normalized as new papers are verified)
 - `papers/recent-and-adjacent.md` — **high-priority recent papers and papers that directly threaten/shape novelty**
+- `papers/updates-2026-09-07.md` — latest batch on multi-harness credit, harness evolution, epistemic diversity, evidence integration, OPD data selection, persistent experience graphs, and research-agent exploration
 - `papers/harnessed-agentic-rl.md` — harness-native / harnessed RL
 - `papers/harness-optimization.md` — harness optimization and evolution
 - `papers/internalization.md` — self-distillation, capability handoff, retirement
@@ -30,7 +31,7 @@ This repository tracks:
 
 ## Current must-track set
 
-The core map includes OPHSD, Co-Harness, Agent Lightning v1.0, OpenForgeRL, Harness-RL, EvoHarness-RL, CHILL-Harness, SafeEvolve, JIT-Agent, AutoSaddler, StarHarness, EnvHarness, TaoLive HAT, ReSkill, D2Skill and SKILLC. The adjacent algorithmic tracker additionally follows recent work such as **PGPO** and **Coverage, Not Targeting**, plus high-value process-attribution/diversity work such as **CHIME**.
+The core map includes OPHSD, Co-Harness, Agent Lightning v1.0, OpenForgeRL, Harness-RL, EvoHarness-RL, CHILL-Harness, SafeEvolve, JIT-Agent, AutoSaddler, StarHarness, EnvHarness, TaoLive HAT, ReSkill, D2Skill and SKILLC. The adjacent algorithmic tracker additionally follows recent work such as **PGPO**, **Coverage, Not Targeting**, **What Does Multi-Harness RL Learn?**, **CoSkill**, and **EVOHARNESSBENCH**, plus high-value process-attribution/diversity work such as **CHIME** and **On Epistemic Diversity in Large Language Models**.
 
 ## Live statistics
 
