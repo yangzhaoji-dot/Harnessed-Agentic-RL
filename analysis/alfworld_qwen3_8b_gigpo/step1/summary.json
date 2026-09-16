@@ -1,0 +1,42 @@
+{
+  "source": "wckwan/PRM-agent-rl-artifacts/rollouts/alfworld_qwen3_8b_gigpo/1.jsonl",
+  "sha256": "94b1d25e91655184ec151ebc835e19a87707fd814cddc2a4c26d2c5b76b91e23",
+  "rows": 5120,
+  "keys_and_types": {
+    "input": {
+      "str": 5120
+    },
+    "output": {
+      "str": 5120
+    },
+    "score": {
+      "float": 5120
+    },
+    "step": {
+      "int": 5120
+    }
+  },
+  "input_keys_seen": {
+    "input": 5120
+  },
+  "response_keys_seen": {
+    "output": 5120
+  },
+  "reward_keys_seen": {
+    "score": 5120
+  },
+  "reward_count": 5120,
+  "reward_min": -0.10000000149011612,
+  "reward_max": 10.0,
+  "reward_mean": 2.182148430417874,
+  "reward_values": {
+    "10.0": 1034,
+    "9.899999618530273": 92,
+    "0.0": 3212,
+    "-0.10000000149011612": 782
+  },
+  "unique_extracted_tasks": 16,
+  "mixed_outcome_task_groups": 15,
+  "response_chars_mean": 4981.4375,
+  "response_chars_median": 4722.5
+}
