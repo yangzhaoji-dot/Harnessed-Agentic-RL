@@ -1,0 +1,101 @@
+name: Analyze ALFWorld Qwen3-8B GiGPO score curve
+
+on:
+  push:
+    paths:
+      - '.github/workflows/analyze-alfworld-score-curve.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download sampled rollout dumps and summarize score
+        run: |
+          set -euo pipefail
+          mkdir -p analysis/alfworld_qwen3_8b_gigpo/score_curve /tmp/alf_score
+          python - <<'PY'
+          import csv, json, math, statistics, subprocess
+          from collections import Counter
+          from pathlib import Path
+
+          steps = [1] + list(range(20, 401, 20))
+          outdir = Path('analysis/alfworld_qwen3_8b_gigpo/score_curve')
+          rows_out = []
+          base = 'https://huggingface.co/datasets/wckwan/PRM-agent-rl-artifacts/resolve/main/rollouts/alfworld_qwen3_8b_gigpo/{step}.jsonl?download=true'
+
+          for step in steps:
+              path = Path(f'/tmp/alf_score/{step}.jsonl')
+              url = base.format(step=step)
+              print(f'Downloading step {step}...')
+              subprocess.run(['curl','-L','--fail','--retry','5','--retry-delay','2',url,'-o',str(path)], check=True)
+              scores=[]
+              with path.open('r', encoding='utf-8') as f:
+                  for line in f:
+                      if not line.strip():
+                          continue
+                      obj=json.loads(line)
+                      scores.append(float(obj['score']))
+              c=Counter(round(x,4) for x in scores)
+              rows_out.append({
+                  'optimizer_step': step,
+                  'rows': len(scores),
+                  'score_mean': statistics.fmean(scores) if scores else math.nan,
+                  'score_median': statistics.median(scores) if scores else math.nan,
+                  'high_score_rate': sum(x >= 9.0 for x in scores)/len(scores),
+                  'positive_rate': sum(x > 0 for x in scores)/len(scores),
+                  'zero_rate': sum(abs(x) < 1e-8 for x in scores)/len(scores),
+                  'negative_rate': sum(x < 0 for x in scores)/len(scores),
+                  'score_10_rate': sum(abs(x-10.0) < 1e-3 for x in scores)/len(scores),
+                  'score_9_9_rate': sum(abs(x-9.9) < 1e-2 for x in scores)/len(scores),
+                  'score_0_rate': sum(abs(x) < 1e-8 for x in scores)/len(scores),
+                  'score_neg_0_1_rate': sum(abs(x+0.1) < 1e-2 for x in scores)/len(scores),
+                  'score_values': json.dumps(dict(sorted(c.items())), ensure_ascii=False),
+              })
+              path.unlink(missing_ok=True)
+
+          csv_path=outdir/'score_curve_20step.csv'
+          with csv_path.open('w', newline='', encoding='utf-8') as f:
+              w=csv.DictWriter(f, fieldnames=list(rows_out[0].keys()))
+              w.writeheader(); w.writerows(rows_out)
+
+          md=[]
+          md.append('# Qwen3-8B GiGPO ALFWorld raw `score` curve')
+          md.append('')
+          md.append('Sampled at optimizer step 1 and every 20 steps through 400 from the public rollout dumps. `score_mean` is the mean over JSONL rows, so it is a **row-weighted dump statistic**, not necessarily identical to the trainer\'s episode-level success-rate metric.')
+          md.append('')
+          md.append('| optimizer step | mean score | high score (>=9) | zero | -0.1 | rows |')
+          md.append('|---:|---:|---:|---:|---:|---:|')
+          for r in rows_out:
+              md.append(f"| {r['optimizer_step']} | {r['score_mean']:.3f} | {100*r['high_score_rate']:.1f}% | {100*r['zero_rate']:.1f}% | {100*r['negative_rate']:.1f}% | {r['rows']} |")
+          md.append('')
+          md.append('## Interpretation')
+          md.append('')
+          md.append('- In these dumps, scores are concentrated near `10`, `9.9`, `0`, and `-0.1`.')
+          md.append('- `10/9.9` are high-outcome rows; `0` are unsuccessful rows without the small penalty; `-0.1` indicates an unsuccessful row with the penalty used by this run.')
+          md.append('- Because multi-turn rollouts are flattened into dump rows, longer trajectories can contribute more rows. Use this curve for training-behavior diagnostics; use the model card / trainer metrics for episode-level success rate.')
+          md.append('')
+          md.append('Source: `wckwan/PRM-agent-rl-artifacts/rollouts/alfworld_qwen3_8b_gigpo` (public Hugging Face dataset).')
+          (outdir/'score_curve_20step.md').write_text('\n'.join(md), encoding='utf-8')
+
+          print('\n'.join(md))
+          PY
+
+      - name: Commit score curve
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add analysis/alfworld_qwen3_8b_gigpo/score_curve
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Analyze Qwen3-8B GiGPO ALFWorld raw score curve [skip ci]'
+          git push
