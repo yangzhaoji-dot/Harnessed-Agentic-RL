@@ -1,0 +1,6 @@
+source,type,model_or_scale,alfworld_size,full_episode_identity,training_dynamics,external_support_condition,main_use,url
+PRM-agent-rl-artifacts,true optimizer-step RL rollout dump,Qwen3-8B GiGPO,optimizer-step JSONL dumps,no,yes,no,training dynamics and matched-context failure analysis,https://huggingface.co/datasets/wckwan/PRM-agent-rl-artifacts
+TALE Suite,evaluation trajectories,many LLMs,~3.42k trajectories,yes,no,no,cross-model complete-trajectory comparison,https://huggingface.co/datasets/talesuite/tale_suite_trajectories
+MATM,evaluation + retrieval trajectories,34-model ALFWorld consumer population,"2130 population-run episodes + 7147 prepopulation successful trajectories",yes,no,yes,retrieval/memory Harness-like comparison,https://huggingface.co/datasets/toeunkim/matm-trajectories
+ALFWorld transition pairs,replayable transition pairs,1.5B agent,"420 episodes; 7954 raw transitions; 7552 distinct pairs",provenance via traj_uid,no,no,credit assignment branch analysis and replay,https://huggingface.co/datasets/XinnanZhang/alfworld-transition-pairs-1.5b
+auto-dreamer,rollout trajectories + memory-writer outputs,memory-RL pipeline,"3553 train episodes + 274 test episodes",yes,no,yes,Information/Memory Harness and failure-diagnosis analysis,https://huggingface.co/datasets/uyffg/auto-dreamer
