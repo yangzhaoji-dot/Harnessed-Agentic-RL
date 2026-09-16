@@ -1,0 +1,54 @@
+name: Analyze ALFWorld Qwen3-8B GiGPO failure signals
+
+on:
+  push:
+    paths:
+      - '.github/workflows/analyze-alfworld-failure-signals.yml'
+      - 'scripts/analyze_alfworld_failure_signals.py'
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download selected public rollout dumps
+        run: |
+          set -euxo pipefail
+          mkdir -p /tmp/alfworld_failure_signals
+          for s in 1 20 80 160 300 400; do
+            curl -L --fail --retry 5 --retry-delay 2 \
+              "https://huggingface.co/datasets/wckwan/PRM-agent-rl-artifacts/resolve/main/rollouts/alfworld_qwen3_8b_gigpo/${s}.jsonl?download=true" \
+              -o "/tmp/alfworld_failure_signals/${s}.jsonl"
+            echo "step=${s} rows=$(wc -l < /tmp/alfworld_failure_signals/${s}.jsonl)"
+          done
+
+      - name: Quantify observable failure signals
+        run: |
+          python scripts/analyze_alfworld_failure_signals.py \
+            --inputs \
+              1=/tmp/alfworld_failure_signals/1.jsonl \
+              20=/tmp/alfworld_failure_signals/20.jsonl \
+              80=/tmp/alfworld_failure_signals/80.jsonl \
+              160=/tmp/alfworld_failure_signals/160.jsonl \
+              300=/tmp/alfworld_failure_signals/300.jsonl \
+              400=/tmp/alfworld_failure_signals/400.jsonl \
+            --out analysis/alfworld_qwen3_8b_gigpo/failure_signals
+
+      - name: Commit analysis outputs
+        run: |
+          set -euxo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add analysis/alfworld_qwen3_8b_gigpo/failure_signals
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Analyze Qwen3-8B ALFWorld failure-signal evolution [skip ci]'
+          git push
