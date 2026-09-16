@@ -19,6 +19,8 @@ This repository tracks:
 - `papers/papers.csv` — master structured literature table (being normalized as new papers are verified)
 - `papers/recent-and-adjacent.md` — **high-priority recent papers and papers that directly threaten/shape novelty**
 - `papers/alfworld-empirical-design-map-2026-09-16.md` — **real ALFWorld training rollouts / trajectory datasets + Harness-relevant intervention, credit, internalization and retirement designs**
+- `analysis/alfworld_public_trajectory_corpora.md` — **focused public-trajectory inventory for cross-model / cross-training comparison: Qwen3-8B GiGPO, TALE Suite, MATM, 1.5B transition pairs, and auto-dreamer memory-RL traces**
+- `analysis/alfworld_public_trajectory_corpora.csv` — machine-readable manifest for the same trajectory corpora
 - `papers/alfworld-search-addendum-2026-09-16.md` — **closest novelty threats from the broad ALFWorld/Harness search, especially EDGE, Agent-G², BCSD and step-native Agent-R1 infrastructure**
 - `notes/alfworld-trajectory-reading-and-harness-analysis.md` — **practical workflow for reading real ALFWorld rollouts, matching success/failure trajectories, locating divergence points, classifying Harness-relevant failure modes, and designing counterfactual interventions**
 - `papers/updates-2026-09-07.md` — latest batch on multi-harness credit, harness evolution, epistemic diversity, evidence integration, OPD data selection, persistent experience graphs, and research-agent exploration
