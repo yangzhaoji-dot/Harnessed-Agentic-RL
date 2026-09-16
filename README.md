@@ -20,6 +20,7 @@ This repository tracks:
 - `papers/recent-and-adjacent.md` — **high-priority recent papers and papers that directly threaten/shape novelty**
 - `papers/alfworld-empirical-design-map-2026-09-16.md` — **real ALFWorld training rollouts / trajectory datasets + Harness-relevant intervention, credit, internalization and retirement designs**
 - `papers/alfworld-search-addendum-2026-09-16.md` — **closest novelty threats from the broad ALFWorld/Harness search, especially EDGE, Agent-G², BCSD and step-native Agent-R1 infrastructure**
+- `notes/alfworld-trajectory-reading-and-harness-analysis.md` — **practical workflow for reading real ALFWorld rollouts, matching success/failure trajectories, locating divergence points, classifying Harness-relevant failure modes, and designing counterfactual interventions**
 - `papers/updates-2026-09-07.md` — latest batch on multi-harness credit, harness evolution, epistemic diversity, evidence integration, OPD data selection, persistent experience graphs, and research-agent exploration
 - `papers/harnessed-agentic-rl.md` — harness-native / harnessed RL
 - `papers/harness-optimization.md` — harness optimization and evolution
