@@ -1,0 +1,159 @@
+name: Analyze ALFWorld Qwen3-8B GiGPO token lengths
+
+on:
+  push:
+    paths:
+      - '.github/workflows/analyze-alfworld-8b-token-lengths.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install tokenizer dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install 'transformers>=4.51.0' tokenizers
+
+      - name: Download sampled dumps and compute token lengths
+        run: |
+          set -euo pipefail
+          mkdir -p analysis/alfworld_qwen3_8b_gigpo/token_lengths /tmp/alf_tokens
+          python - <<'PY'
+          import csv, json, math, re, statistics, subprocess
+          from pathlib import Path
+          from transformers import AutoTokenizer
+
+          MODEL='Qwen/Qwen3-8B'
+          tokenizer=AutoTokenizer.from_pretrained(MODEL, trust_remote_code=True)
+          steps=[1]+list(range(20,401,20))
+          base='https://huggingface.co/datasets/wckwan/PRM-agent-rl-artifacts/resolve/main/rollouts/alfworld_qwen3_8b_gigpo/{step}.jsonl?download=true'
+          outdir=Path('analysis/alfworld_qwen3_8b_gigpo/token_lengths')
+          action_re=re.compile(r'<action>\s*(.*?)\s*</action>', re.I|re.S)
+          env_step_re=re.compile(r'You are now at step\s+(\d+)', re.I)
+
+          def toks(text):
+              return len(tokenizer.encode(text or '', add_special_tokens=False))
+
+          def pct(xs,p):
+              if not xs: return float('nan')
+              ys=sorted(xs)
+              k=(len(ys)-1)*p
+              lo=math.floor(k); hi=math.ceil(k)
+              if lo==hi: return float(ys[lo])
+              return ys[lo]*(hi-k)+ys[hi]*(k-lo)
+
+          def stats(xs):
+              return {
+                  'avg': statistics.fmean(xs) if xs else math.nan,
+                  'median': statistics.median(xs) if xs else math.nan,
+                  'p90': pct(xs,.90),
+                  'p95': pct(xs,.95),
+                  'max': max(xs) if xs else math.nan,
+              }
+
+          summaries=[]
+          all_rows=[]
+          bucket_rows=[]
+          for step in steps:
+              path=Path(f'/tmp/alf_tokens/{step}.jsonl')
+              subprocess.run(['curl','-L','--fail','--retry','5','--retry-delay','2',base.format(step=step),'-o',str(path)],check=True)
+              records=[]
+              with path.open(encoding='utf-8') as f:
+                  for line in f:
+                      if not line.strip(): continue
+                      o=json.loads(line)
+                      inp=str(o.get('input','')); out=str(o.get('output',''))
+                      m=action_re.search(out); action=m.group(1).strip() if m else ''
+                      sm=env_step_re.search(inp); env_step=int(sm.group(1)) if sm else None
+                      i=toks(inp); oo=toks(out); a=toks(action) if action else 0
+                      records.append((i,oo,i+oo,a,env_step))
+                      all_rows.append((step,i,oo,i+oo,a,env_step))
+              for metric,idx in [('input',0),('output',1),('turn_total',2),('action_command',3)]:
+                  s=stats([r[idx] for r in records])
+                  summaries.append({'optimizer_step':step,'rows':len(records),'metric':metric,**s})
+              path.unlink(missing_ok=True)
+
+          # Aggregate over all sampled dump rows (row-weighted).
+          aggregate=[]
+          for metric,idx in [('input',1),('output',2),('turn_total',3),('action_command',4)]:
+              s=stats([r[idx] for r in all_rows])
+              aggregate.append({'scope':'all_sampled_rows','rows':len(all_rows),'metric':metric,**s})
+
+          # Env-step buckets over all sampled dumps to see whether history_length=2 keeps prompt length bounded.
+          def bucket(t):
+              if t is None: return 'unknown'
+              if t<=2: return '1-2'
+              if t<=5: return '3-5'
+              if t<=10: return '6-10'
+              if t<=20: return '11-20'
+              if t<=30: return '21-30'
+              if t<=40: return '31-40'
+              return '41-50+'
+          groups={}
+          for _,i,o,total,a,es in all_rows:
+              b=bucket(es); groups.setdefault(b,[]).append((i,o,total,a))
+          order=['1-2','3-5','6-10','11-20','21-30','31-40','41-50+','unknown']
+          for b in order:
+              rr=groups.get(b,[])
+              if not rr: continue
+              si=stats([x[0] for x in rr]); so=stats([x[1] for x in rr]); st=stats([x[2] for x in rr])
+              bucket_rows.append({'env_step_bucket':b,'rows':len(rr),'input_avg':si['avg'],'input_p95':si['p95'],'input_max':si['max'],'output_avg':so['avg'],'output_max':so['max'],'turn_avg':st['avg'],'turn_max':st['max']})
+
+          with (outdir/'token_length_by_optimizer_step.csv').open('w',newline='',encoding='utf-8') as f:
+              w=csv.DictWriter(f,fieldnames=list(summaries[0].keys())); w.writeheader(); w.writerows(summaries)
+          with (outdir/'token_length_aggregate.csv').open('w',newline='',encoding='utf-8') as f:
+              w=csv.DictWriter(f,fieldnames=list(aggregate[0].keys())); w.writeheader(); w.writerows(aggregate)
+          with (outdir/'token_length_by_env_step.csv').open('w',newline='',encoding='utf-8') as f:
+              w=csv.DictWriter(f,fieldnames=list(bucket_rows[0].keys())); w.writeheader(); w.writerows(bucket_rows)
+
+          agg={x['metric']:x for x in aggregate}
+          md=[]
+          md += ['# Qwen3-8B GiGPO ALFWorld token-length statistics','',
+                 '> Re-tokenized from the public JSONL `input` / `output` strings with the official `Qwen/Qwen3-8B` tokenizer (`add_special_tokens=False`). Each JSONL row is one model decision/action turn, not a full trajectory. Exact original trainer token counts may differ slightly if the dump decode/re-encode path was not perfectly lossless.','',
+                 '## Aggregate over sampled optimizer dumps (step 1 + every 20 through 400)','',
+                 '| unit | average | median | P90 | P95 | max |','|---|---:|---:|---:|---:|---:|']
+          labels={'input':'input prompt','output':'assistant output (reasoning + action)','turn_total':'decision/action turn total (input + output)','action_command':'action command only'}
+          for key in ['input','output','turn_total','action_command']:
+              x=agg[key]
+              md.append(f"| {labels[key]} | {x['avg']:.1f} | {x['median']:.1f} | {x['p90']:.1f} | {x['p95']:.1f} | {int(x['max'])} |")
+          md += ['',f"Total sampled decision rows: **{len(all_rows):,}**.",'',
+                 '## By optimizer step — average / max decision-turn tokens','',
+                 '| optimizer step | rows | input avg | input max | output avg | output max | turn avg | turn max | action cmd avg | action cmd max |',
+                 '|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|']
+          by={}
+          for x in summaries: by.setdefault(x['optimizer_step'],{})[x['metric']]=x
+          for step in steps:
+              d=by[step]
+              md.append(f"| {step} | {d['input']['rows']} | {d['input']['avg']:.1f} | {int(d['input']['max'])} | {d['output']['avg']:.1f} | {int(d['output']['max'])} | {d['turn_total']['avg']:.1f} | {int(d['turn_total']['max'])} | {d['action_command']['avg']:.1f} | {int(d['action_command']['max'])} |")
+          md += ['', '## By ALFWorld environment-step bucket — all sampled dumps','',
+                 '| env step | rows | input avg | input P95 | input max | output avg | output max | turn avg | turn max |',
+                 '|---|---:|---:|---:|---:|---:|---:|---:|---:|']
+          for r in bucket_rows:
+              md.append(f"| {r['env_step_bucket']} | {r['rows']} | {r['input_avg']:.1f} | {r['input_p95']:.1f} | {int(r['input_max'])} | {r['output_avg']:.1f} | {int(r['output_max'])} | {r['turn_avg']:.1f} | {int(r['turn_max'])} |")
+          md += ['', '## Interpretation note','',
+                 '- `turn_total` is one decision/action turn: the prompt visible before the decision plus that assistant response. It is **not** the cumulative full-trajectory token count.',
+                 '- Because this GiGPO run keeps only a short recent history window, prompt length should become roughly bounded after the early steps rather than growing linearly with trajectory length. The env-step table tests this directly.',
+                 '- The 4B full-history recipe uses a different accounting regime: its `12K` cap is on the cumulative full trajectory, so do not compare `12K` directly against the 8B per-turn maximum.']
+          (outdir/'token_length_report.md').write_text('\n'.join(md),encoding='utf-8')
+          print('\n'.join(md))
+          PY
+
+      - name: Commit token-length analysis
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add analysis/alfworld_qwen3_8b_gigpo/token_lengths
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Analyze Qwen3-8B ALFWorld token lengths [skip ci]'
+          git push
