@@ -27,9 +27,17 @@ jobs:
           wc -l /tmp/alfworld_step1/1.jsonl
           ls -lh /tmp/alfworld_step1/1.jsonl
 
-      - name: Reconstruct episodes and locate divergence points
+      - name: Analyze exact-context local branches
         run: |
-          python scripts/analyze_alfworld_rollout_dump.py \
+          set -euxo pipefail
+          rm -f \
+            analysis/alfworld_qwen3_8b_gigpo/step1/episode_summary.json \
+            analysis/alfworld_qwen3_8b_gigpo/step1/episodes_index.jsonl \
+            analysis/alfworld_qwen3_8b_gigpo/step1/divergence_pairs.jsonl \
+            analysis/alfworld_qwen3_8b_gigpo/step1/divergence_pairs.md \
+            analysis/alfworld_qwen3_8b_gigpo/step1/mixed_pairs.md \
+            analysis/alfworld_qwen3_8b_gigpo/step1/representative_trajectories.jsonl || true
+          python scripts/analyze_alfworld_local_branches.py \
             /tmp/alfworld_step1/1.jsonl \
             analysis/alfworld_qwen3_8b_gigpo/step1
 
@@ -38,10 +46,10 @@ jobs:
           set -euxo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add analysis/alfworld_qwen3_8b_gigpo/step1
+          git add -A analysis/alfworld_qwen3_8b_gigpo/step1
           if git diff --cached --quiet; then
             echo 'No changes to commit.'
             exit 0
           fi
-          git commit -m 'Reconstruct Qwen3-8B GiGPO ALFWorld step-1 episodes [skip ci]'
+          git commit -m 'Analyze Qwen3-8B GiGPO matched local branches [skip ci]'
           git push
