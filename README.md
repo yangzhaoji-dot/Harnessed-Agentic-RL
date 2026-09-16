@@ -19,6 +19,7 @@ This repository tracks:
 - `papers/papers.csv` — master structured literature table (being normalized as new papers are verified)
 - `papers/recent-and-adjacent.md` — **high-priority recent papers and papers that directly threaten/shape novelty**
 - `papers/alfworld-empirical-design-map-2026-09-16.md` — **real ALFWorld training rollouts / trajectory datasets + Harness-relevant intervention, credit, internalization and retirement designs**
+- `papers/alfworld-search-addendum-2026-09-16.md` — **closest novelty threats from the broad ALFWorld/Harness search, especially EDGE, Agent-G², BCSD and step-native Agent-R1 infrastructure**
 - `papers/updates-2026-09-07.md` — latest batch on multi-harness credit, harness evolution, epistemic diversity, evidence integration, OPD data selection, persistent experience graphs, and research-agent exploration
 - `papers/harnessed-agentic-rl.md` — harness-native / harnessed RL
 - `papers/harness-optimization.md` — harness optimization and evolution
@@ -34,7 +35,7 @@ This repository tracks:
 
 The core map includes OPHSD, Co-Harness, Agent Lightning v1.0, OpenForgeRL, Harness-RL, EvoHarness-RL, CHILL-Harness, SafeEvolve, JIT-Agent, AutoSaddler, StarHarness, EnvHarness, TaoLive HAT, ReSkill, D2Skill and SKILLC. The adjacent algorithmic tracker additionally follows recent work such as **PGPO**, **Coverage, Not Targeting**, **What Does Multi-Harness RL Learn?**, **CoSkill**, and **EVOHARNESSBENCH**, plus high-value process-attribution/diversity work such as **CHIME** and **On Epistemic Diversity in Large Language Models**.
 
-For ALFWorld-driven method design, the empirical tracker additionally follows **GiGPO, T²PO, HiPER, SALT, HCAPO, SHADOW, PGPO, OCSD, SDAR, SIRI, GRSD, Q-Evolve, Guided-OPD, TCOD, TurnOPD, ATOD, Selective Rollout, RWML, MemRL, Skill0/0.5, SkillRise**, and public trajectory/log datasets that allow behavior-level analysis rather than only final benchmark scores.
+For ALFWorld-driven method design, the empirical tracker additionally follows **GiGPO, T²PO, HiPER, SALT, HCAPO, SHADOW, PGPO, OCSD, EDGE, Agent-G², BCSD, SDAR, SIRI, GRSD, Q-Evolve, Guided-OPD, TCOD, TurnOPD, ATOD, Selective Rollout, RWML, MemRL, Skill0/0.5, SkillRise**, and public trajectory/log datasets that allow behavior-level analysis rather than only final benchmark scores.
 
 ## Live statistics
 
